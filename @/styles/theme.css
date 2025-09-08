@@ -118,4 +118,33 @@ button:active{ transform:translateY(1px) }
 }
 
 footer{ padding:24px 0; color:#8f7a8b; font-size:13px }
+/* 角色主题覆盖：陪玩=粉、客服=蓝、财务=橙、管理=紫 */
+:root{
+  --bg:#fff7fb; --stripe:#ffe9f3; --line:#ffd1e6; --deep:#ff9ac2; --ink:#6b4e5e;
+}
+
+/* 客服：蓝 */
+html[data-role="客服"]{
+  --bg:#f6fbff; --stripe:#e9f4ff; --line:#cfe6ff; --deep:#54a3ff; --ink:#33506b;
+}
+/* 财务：橙 */
+html[data-role="财务"]{
+  --bg:#fff9f3; --stripe:#fff1e1; --line:#ffd7b0; --deep:#ff9a3e; --ink:#614a33;
+}
+/* 管理：紫 */
+html[data-role="管理"]{
+  --bg:#fbf6ff; --stripe:#f3e9ff; --line:#e1cfff; --deep:#9a54ff; --ink:#47336b;
+}
+
+/* 可爱贴纸、移动端优化（若未贴过就保留） */
+.cat-title{ font-family:"ZCOOL KuaiLe","Noto Sans SC",cursive; display:flex; gap:8px }
+.cat-card{ position:relative; overflow:hidden }
+@media (max-width:640px){
+  .container{ padding:12px }
+  nav{ padding:10px 12px; gap:8px; overflow-x:auto }
+  .card{ border-radius:16px; padding:14px }
+  .grid{ gap:10px }
+  .grid-2{ grid-template-columns:1fr }
+  button,.input{ font-size:16px }
+}
 
