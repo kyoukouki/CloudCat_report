@@ -21,12 +21,33 @@ export default function SignIn() {
   }
 
   async function nextByEmail(e){
-    e.preventDefault()
-    setLoading(true); setMsg('')
-     const { data: exists } = await supabase.rpc('email_registered', { e: email })
+  e.preventDefault()
+  setLoading(true); setMsg('')
+  try {
+    let exists = null
+
+    // 1) 首选 RPC：查 auth.users 是否已存在
+    const { data: ex, error: e1 } = await supabase.rpc('email_registered', { e: email })
+    if (e1) console.warn('rpc error:', e1.message)
+    if (typeof ex === 'boolean') exists = ex
+
+    // 2) 兜底：查 profiles 里是否已有（有些老账号没建 profile）
+    if (exists === null) {
+      const { data: p, error: e2 } = await supabase
+        .from('profiles').select('id').eq('email', email).maybeSingle()
+      if (e2) console.warn('profiles check error:', e2.message)
+      exists = !!p?.id
+    }
+
     setStep(exists ? 'login' : 'register')
-    setLoading(false)
+  } catch (err) {
+    console.error(err)
+    setMsg('查询邮箱时出错，请重试或直接选择登录。')
+    setStep('login') // 再兜底：直接切登录
+  } finally {
+    setLoading(false) // 一定要关掉 loading，避免卡住
   }
+}
 
   async function doLogin(e){
     e.preventDefault()
