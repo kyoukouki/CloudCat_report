@@ -14,6 +14,7 @@ export default function Nav() {
         const { data: p } = await supabase
           .from('profiles')
           .select('name, role')
+          .select('name, role, status')
           .eq('id', data.user.id)
           .single()
         setProfile(p || null)
