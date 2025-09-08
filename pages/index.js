@@ -11,9 +11,15 @@ export default function Home() {
     supabase.auth.getUser().then(async ({ data }) => {
       setUser(data.user || null)
       if (data.user) {
+        // ✅ 必须把 role/status 一起选出来
         const { data: p } = await supabase
-          .from('profiles').select('name, role').eq('id', data.user.id).single()
+          .from('profiles')
+          .select('name, role, status')
+          .eq('id', data.user.id)
+          .single()
         setProfile(p || null)
+        // 用于切换主题色
+        if (p?.role) document.documentElement.setAttribute('data-role', p.role)
       }
     })
   }, [])
@@ -47,7 +53,7 @@ export default function Home() {
             <Link href="/finance" className="card">财务汇总</Link>
           )}
           {canSee(role,'admin') && (
-            <Link href="/admin" className="card">管理后台（可选）</Link>
+            <Link href="/admin" className="card">管理后台</Link>
           )}
         </div>
       </div>
