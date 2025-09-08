@@ -1,78 +1,120 @@
-/* ===== Kawaii 粉萌主题（全站生效） ===== */
-
-/* 颜色与阴影 */
 :root{
-  --bg:#fff7fb;        /* 背景很浅的粉 */
-  --stripe:#ffe9f3;    /* 条纹粉 */
-  --line:#ffd1e6;      /* 线条粉 */
-  --deep:#ff9ac2;      /* 主题深粉 (按钮/重点) */
-  --ink:#6b4e5e;       /* 文本墨色(带点紫) */
-  --card:#ffffff;      /* 卡片底色 */
+  --bg:#fff7fb;
+  --stripe:#ffe9f3;
+  --line:#ffd1e6;
+  --deep:#ff9ac2;
+  --ink:#6b4e5e;
+  --card:#ffffff;
   --shadow:0 6px 0 #ffc2d8, 0 8px 24px rgba(255,158,194,.25);
 }
 
-/* 全局字体 & 条纹背景 */
-*{box-sizing:border-box}
+*{ box-sizing:border-box }
 html,body{
-  padding:0;margin:0;
-  background:
-    /* 竖向糖果条纹 */
-    repeating-linear-gradient(
-      0deg,
-      var(--bg) 0, var(--bg) 36px,
-      var(--stripe) 36px, var(--stripe) 72px
-    );
+  padding:0; margin:0;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--bg) 0, var(--bg) 36px,
+    var(--stripe) 36px, var(--stripe) 72px
+  );
   color:var(--ink);
-  font-family: "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", Arial;
+  font-family:"Noto Sans SC",ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",Arial;
 }
 
-/* 标题走可爱手写风（在 _app.js 里会引入 ZCOOL KuaiLe） */
-h1,h2,h3{font-family: "ZCOOL KuaiLe","Noto Sans SC",cursive; letter-spacing: .5px}
+h1,h2,h3{
+  font-family:"ZCOOL KuaiLe","Noto Sans SC",cursive;
+  letter-spacing:.5px;
+}
 
-a{color:inherit; text-decoration:none}
-.container{max-width: 1024px; margin:0 auto; padding:20px}
+a{ color:inherit; text-decoration:none }
+.container{ max-width:1024px; margin:0 auto; padding:20px }
 
-/* ---------- 顶部导航 ---------- */
+/* nav */
 nav{
   display:flex; gap:12px; align-items:center;
-  position: sticky; top:0; z-index:10;
+  position:sticky; top:0; z-index:10;
   padding:14px 18px;
-  background: linear-gradient(180deg,#fff, var(--bg));
-  border-bottom: 2px solid var(--line);
+  background:linear-gradient(180deg,#fff,var(--bg));
+  border-bottom:2px solid var(--line);
 }
 nav .brand{
-  font-family: "ZCOOL KuaiLe"; font-size:20px;
+  font-family:"ZCOOL KuaiLe"; font-size:20px;
   background:#fff; padding:6px 12px; border-radius:999px;
-  border:2px solid var(--line); box-shadow: var(--shadow);
+  border:2px solid var(--line); box-shadow:var(--shadow);
 }
 nav a{
   background:#fff; padding:8px 12px; border-radius:999px;
   border:2px solid var(--line);
-  box-shadow: 0 2px 0 #ffc2d8;
-  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow:0 2px 0 #ffc2d8;
+  transition:transform .15s ease, box-shadow .15s ease;
 }
-nav a:hover{ transform: translateY(-2px); box-shadow: 0 4px 0 #ffc2d8 }
-nav .spacer{flex:1}
+nav a:hover{ transform:translateY(-2px); box-shadow:0 4px 0 #ffc2d8 }
+nav .spacer{ flex:1 }
 .badge{
   padding:6px 10px; border-radius:999px; margin-right:8px;
-  background: linear-gradient(180deg,#fff,var(--bg));
+  background:linear-gradient(180deg,#fff,var(--bg));
   border:2px solid var(--line); font-size:12px;
 }
 small.muted{ color:#8f7a8b }
 
-/* ---------- 卡片 / 表单 / 表格 ---------- */
+/* cards / grid */
 .card{
-  background: linear-gradient(180deg,#fff, #fff7fe);
+  background:linear-gradient(180deg,#fff,#fff7fe);
   border:2px solid var(--line);
   border-radius:20px;
   padding:16px; margin:14px 0;
-  box-shadow: var(--shadow);
+  box-shadow:var(--shadow);
 }
 .grid{ display:grid; gap:12px }
-.grid-2{ grid-template-columns: repeat(2, minmax(0,1fr)) }
+.grid-2{ grid-template-columns:repeat(2,minmax(0,1fr)) }
 
-button, input, select, textarea{
-  font-size:14px;
-}
+/* form */
+button, input, select, textarea{ font-size:14px }
 .input, textarea, select{
-  wid
+  width:100%;
+  background:#fff;
+  border-radius:14px;
+  border:2px solid var(--line);
+  padding:10px 12px;
+  outline:none;
+  transition:box-shadow .15s ease, border-color .15s ease;
+}
+.input:focus, textarea:focus, select:focus{
+  border-color:var(--deep);
+  box-shadow:0 0 0 4px rgba(255,154,194,.18);
+}
+button{
+  border-radius:999px; padding:10px 16px; cursor:pointer;
+  border:2px solid var(--line);
+  background:linear-gradient(180deg,#fff,#ffe5f0);
+  box-shadow:var(--shadow);
+}
+button.ghost{ background:#fff }
+button.danger{ background:linear-gradient(180deg,#ffe2e7,#ffd0d8); border-color:#ffb0c1 }
+button:active{ transform:translateY(1px) }
+
+/* table */
+.table{
+  width:100%; border-collapse:collapse; background:#fff; overflow:hidden;
+  border-radius:18px; border:2px solid var(--line);
+}
+.table th{
+  background:#fff0f6; border-bottom:2px solid var(--line);
+  padding:10px 8px; text-align:left; font-weight:600;
+}
+.table td{
+  border-bottom:1px dashed #ffd7e6; padding:10px 8px;
+}
+.table tr:nth-child(even) td{ background:#fff9fc }
+
+.kpi{ display:flex; gap:12px; align-items:center }
+.kpi div{
+  background:#fff; border:2px solid var(--line);
+  border-radius:16px; padding:10px 12px; box-shadow:var(--shadow);
+}
+
+.alert{
+  background:#fff7e6; border:2px solid #ffd59e;
+  border-radius:14px; padding:10px 12px;
+}
+
+footer{ padding:24px 0; color:#8f7a8b; font-size:13px }
