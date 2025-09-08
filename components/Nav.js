@@ -10,7 +10,11 @@ export default function Nav() {
     supabase.auth.getUser().then(async ({ data }) => {
       setUser(data.user || null)
       if (data.user) {
-        const { data: p } = await supabase.from('profiles').select('name, role').eq('id', data.user.id).single()
+        const { data: p } = await supabase
+          .from('profiles')
+          .select('name, role')
+          .eq('id', data.user.id)
+          .single()
         setProfile(p || null)
       }
     })
@@ -23,16 +27,28 @@ export default function Nav() {
 
   return (
     <nav>
-      <Link href="/">Cloudcat</Link>
-      {(profile?.role === 'PLAYMATE' || profile?.role === 'ADMIN') && (<Link href="/playmate/new">陪玩录单</Link>)}
-      {(profile?.role === 'DISPATCH' || profile?.role === 'ADMIN') && (<Link href="/dispatch">派单/客服</Link>)}
-      {(profile?.role === 'FINANCE' || profile?.role === 'ADMIN') && (<Link href="/finance">财务</Link>)}
+      <Link href="/" className="brand">🐾 云喵 club</Link>
+
+      {(profile?.role === 'PLAYMATE' || profile?.role === 'ADMIN') && (
+        <Link href="/playmate/new">陪玩录单</Link>
+      )}
+      {(profile?.role === 'DISPATCH' || profile?.role === 'ADMIN') && (
+        <Link href="/dispatch">派单/客服</Link>
+      )}
+      {(profile?.role === 'FINANCE' || profile?.role === 'ADMIN') && (
+        <Link href="/finance">财务</Link>
+      )}
+
       <div className="spacer" />
-      {user ? (<>
+      {user ? (
+        <>
           <span className="badge">{profile?.role || 'NO-ROLE'}</span>
           <small className="muted">{profile?.name || user.email}</small>
           <button className="ghost" onClick={signOut}>退出</button>
-        </>) : (<Link className="ghost" href="/signin">登录 / 注册</Link>)}
+        </>
+      ) : (
+        <Link className="ghost" href="/signin">登录 / 注册</Link>
+      )}
     </nav>
   )
 }
