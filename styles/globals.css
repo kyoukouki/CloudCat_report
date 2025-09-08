@@ -1,24 +1,78 @@
-* { box-sizing: border-box; }
-html, body { padding: 0; margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#fafafa; color:#0f172a; }
-a { color: inherit; text-decoration: none; }
-.container { max-width: 980px; margin: 0 auto; padding: 16px; }
-nav { display:flex; gap:12px; align-items:center; padding:12px 16px; border-bottom:1px solid #eee; background:white; position:sticky; top:0; z-index:10; }
-nav .spacer { flex:1; }
-button, input, select, textarea { font-size: 14px; padding: 8px 10px; }
-button { border: 1px solid #222; background:#111; color:white; border-radius: 8px; cursor: pointer; }
-button.ghost { background:white; color:#111; border:1px solid #ccc; }
-button.danger { background:#b91c1c; border-color:#7f1d1d; }
-.card { background:white; border:1px solid #eee; border-radius:12px; padding:16px; margin:12px 0; }
-.table { width:100%; border-collapse: collapse; background:white; border-radius: 12px; overflow: hidden; }
-.table th, .table td { border-bottom: 1px solid #f0f0f0; padding: 10px 6px; text-align: left; }
-.input { width: 100%; border:1px solid #cbd5e1; border-radius:8px; background:white; }
-.grid { display:grid; gap:12px; }
-.grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-.kpi { display:flex; gap:16px; align-items:center; }
-.kpi div { background:#f8fafc; padding:10px 12px; border-radius:10px; border:1px solid #eef2f7; }
-.badge { padding:4px 8px; border-radius:999px; background:#f1f5f9; border:1px solid #e2e8f0; font-size:12px; }
-small.muted { color:#64748b; }
-pre.code { background:#0b1020; color:#c7d2fe; padding:12px; border-radius:10px; overflow:auto; }
-hr { border:0; height:1px; background:#eee; margin: 18px 0; }
-.alert { background:#fef3c7; border:1px solid #fde68a; padding:10px 12px; border-radius:10px; }
-footer { padding:24px 0; color:#6b7280; font-size: 13px; }
+/* ===== Kawaii 粉萌主题（全站生效） ===== */
+
+/* 颜色与阴影 */
+:root{
+  --bg:#fff7fb;        /* 背景很浅的粉 */
+  --stripe:#ffe9f3;    /* 条纹粉 */
+  --line:#ffd1e6;      /* 线条粉 */
+  --deep:#ff9ac2;      /* 主题深粉 (按钮/重点) */
+  --ink:#6b4e5e;       /* 文本墨色(带点紫) */
+  --card:#ffffff;      /* 卡片底色 */
+  --shadow:0 6px 0 #ffc2d8, 0 8px 24px rgba(255,158,194,.25);
+}
+
+/* 全局字体 & 条纹背景 */
+*{box-sizing:border-box}
+html,body{
+  padding:0;margin:0;
+  background:
+    /* 竖向糖果条纹 */
+    repeating-linear-gradient(
+      0deg,
+      var(--bg) 0, var(--bg) 36px,
+      var(--stripe) 36px, var(--stripe) 72px
+    );
+  color:var(--ink);
+  font-family: "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", Arial;
+}
+
+/* 标题走可爱手写风（在 _app.js 里会引入 ZCOOL KuaiLe） */
+h1,h2,h3{font-family: "ZCOOL KuaiLe","Noto Sans SC",cursive; letter-spacing: .5px}
+
+a{color:inherit; text-decoration:none}
+.container{max-width: 1024px; margin:0 auto; padding:20px}
+
+/* ---------- 顶部导航 ---------- */
+nav{
+  display:flex; gap:12px; align-items:center;
+  position: sticky; top:0; z-index:10;
+  padding:14px 18px;
+  background: linear-gradient(180deg,#fff, var(--bg));
+  border-bottom: 2px solid var(--line);
+}
+nav .brand{
+  font-family: "ZCOOL KuaiLe"; font-size:20px;
+  background:#fff; padding:6px 12px; border-radius:999px;
+  border:2px solid var(--line); box-shadow: var(--shadow);
+}
+nav a{
+  background:#fff; padding:8px 12px; border-radius:999px;
+  border:2px solid var(--line);
+  box-shadow: 0 2px 0 #ffc2d8;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+nav a:hover{ transform: translateY(-2px); box-shadow: 0 4px 0 #ffc2d8 }
+nav .spacer{flex:1}
+.badge{
+  padding:6px 10px; border-radius:999px; margin-right:8px;
+  background: linear-gradient(180deg,#fff,var(--bg));
+  border:2px solid var(--line); font-size:12px;
+}
+small.muted{ color:#8f7a8b }
+
+/* ---------- 卡片 / 表单 / 表格 ---------- */
+.card{
+  background: linear-gradient(180deg,#fff, #fff7fe);
+  border:2px solid var(--line);
+  border-radius:20px;
+  padding:16px; margin:14px 0;
+  box-shadow: var(--shadow);
+}
+.grid{ display:grid; gap:12px }
+.grid-2{ grid-template-columns: repeat(2, minmax(0,1fr)) }
+
+button, input, select, textarea{
+  font-size:14px;
+}
+.input, textarea, select{
+  wid
