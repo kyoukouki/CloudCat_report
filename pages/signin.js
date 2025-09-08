@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabaseClient'
 import { getLandingPath } from '@/utils/roles'
@@ -11,7 +11,17 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
 
-  // 1) 根据邮箱判断是否已有档案（有则登录，无则注册）
+  async function ensureProfile(userId, email) {
+    // 如果已有就不覆盖角色；没有就建“陪玩 + 待审核”
+    await supabase.from('profiles').upsert(
+      { id: userId, email, status: 'PENDING' },
+      { onConflict: 'id' }
+    )
+    const { data: p } = await supabase
+      .from('profiles').select('role,status').eq('id', userId).single()
+    return p
+  }
+
   async function nextByEmail(e){
     e.preventDefault()
     setLoading(true); setMsg('')
@@ -20,30 +30,24 @@ export default function SignIn() {
     setLoading(false)
   }
 
-  // 2) 登录（老用户）
   async function doLogin(e){
     e.preventDefault()
     setLoading(true); setMsg('')
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error){ setMsg(error.message); setLoading(false); return }
-    // 查审批 & 跳转
-    const { data: prof } = await supabase.from('profiles').select('role,status').eq('id', data.user.id).single()
+    const prof = await ensureProfile(data.user.id, email)
     if (prof?.status === 'PENDING') return r.replace('/pending')
     r.replace(getLandingPath(prof?.role))
   }
 
-  // 3) 注册（新用户）
   async function doRegister(e){
     e.preventDefault()
     setLoading(true); setMsg('')
-    // 允许无邮箱验证：后台关闭 Confirm email
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error){ setMsg(error.message); setLoading(false); return }
-    // 保险：确保 profile 存在且为待审核
     await supabase.from('profiles').upsert({
       id: data.user.id, email, role: '陪玩', status: 'PENDING'
     }, { onConflict: 'id' })
-    setMsg('注册成功 ✅，请等待管理员确认录入信息')
     r.replace('/pending')
   }
 
