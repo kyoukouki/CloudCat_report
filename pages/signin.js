@@ -1,63 +1,52 @@
+import { useState } from 'react'
+import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabaseClient'
-import { useEffect, useState } from 'react'
-import Nav from '@/components/Nav'
+import { getLandingPath, roleLabel } from '@/utils/roles'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState('signin')
+  const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
+  const router = useRouter()
 
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const user = data.user
-      if (!user) return
-      const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      const r = p?.role
-      if (r) {
-        location.href = r === 'PLAYMATE' ? '/playmate/new' : r === 'DISPATCH' ? '/dispatch' : r === 'FINANCE' ? '/finance' : '/'
-      }
-    })
-  }, [])
+  async function ensureProfile(userId, email) {
+    // 默认新注册为“陪玩”，你也可以改默认角色
+    await supabase.from('profiles').upsert({
+      id: userId, name: email.split('@')[0], role: 'PLAYMATE'
+    }, { onConflict: 'id' })
+    const { data: p } = await supabase
+      .from('profiles').select('name, role').eq('id', userId).single()
+    return p
+  }
 
-  async function submit(e) {
+  async function handleLogin(e) {
     e.preventDefault()
-    setMsg('')
-    try {
-      if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password })
-        if (error) throw error
-        setMsg('注册成功。如果开启了邮件验证，请前往邮箱确认。')
-      } else {
-        const { data: sign, error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-        const { data: p } = await supabase.from('profiles').select('role').eq('id', sign.user.id).single()
-        const r = p?.role
-        const dest = r === 'PLAYMATE' ? '/playmate/new' : r === 'DISPATCH' ? '/dispatch' : r === 'FINANCE' ? '/finance' : '/'
-        location.href = dest
-      }
-    } catch (err) {
-      setMsg(err.message)
+    setLoading(true); setMsg('')
+    // 先尝试登录
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    let user = data?.user
+    if (error) {
+      // 不存在就注册
+      const { data: si, error: se } = await supabase.auth.signUp({ email, password })
+      if (se) { setMsg(se.message); setLoading(false); return }
+      user = si.user
     }
+    const profile = await ensureProfile(user.id, email)
+    setMsg(`欢迎 ${profile?.name || email}（${roleLabel(profile?.role)}）`)
+    router.replace(getLandingPath(profile?.role))
   }
 
   return (
-    <div>
-      <Nav />
-      <div className="container" style={{maxWidth: 420}}>
-        <h2>{mode === 'signup' ? '注册' : '登录'}</h2>
-        <form onSubmit={submit} className="card">
-          <label>邮箱<input className="input" value={email} onChange={e=>setEmail(e.target.value)} required /></label>
-          <label>密码<input className="input" type="password" value={password} onChange={e=>setPassword(e.target.value)} required /></label>
-          <div style={{display:'flex', gap:8, marginTop:12}}>
-            <button type="submit">{mode === 'signup' ? '注册' : '登录'}</button>
-            <button type="button" className="ghost" onClick={()=>setMode(mode==='signup'?'signin':'signup')}>切换到{mode==='signup'?'登录':'注册'}</button>
-          </div>
-          {msg && <p className="alert" style={{marginTop:12}}>{msg}</p>}
+    <div className="container">
+      <div className="card" style={{maxWidth:480, margin:'40px auto'}}>
+        <h2>登录 / 注册</h2>
+        <form onSubmit={handleLogin} className="grid">
+          <input className="input" type="email" placeholder="邮箱" value={email} onChange={e=>setEmail(e.target.value)} required/>
+          <input className="input" type="password" placeholder="密码" value={password} onChange={e=>setPassword(e.target.value)} required/>
+          <button disabled={loading}>{loading ? '处理中…' : '进入云喵后台'}</button>
         </form>
-        <div className="card">
-          <b>提示：</b> 登录后若停在首页，请联系管理员在 <code>profiles</code> 表给你设置角色（PLAYMATE / DISPATCH / FINANCE）。
-        </div>
+        {msg && <p style={{marginTop:10}}>{msg}</p>}
       </div>
     </div>
   )
