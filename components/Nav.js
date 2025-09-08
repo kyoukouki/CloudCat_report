@@ -17,6 +17,7 @@ export default function Nav() {
           .eq('id', data.user.id)
           .single()
         setProfile(p || null)
+        if (p?.role) document.documentElement.setAttribute('data-role', p.role)
       }
     })
   }, [])
