@@ -23,8 +23,8 @@ export default function SignIn() {
   async function nextByEmail(e){
     e.preventDefault()
     setLoading(true); setMsg('')
-    const { data: p } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle()
-    setStep(p ? 'login' : 'register')
+     const { data: exists } = await supabase.rpc('email_registered', { e: email })
+    setStep(exists ? 'login' : 'register')
     setLoading(false)
   }
 
