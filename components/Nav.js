@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { useEffect, useState } from 'react'
+import { roleLabel, canSee } from '@/utils/roles'
 
 export default function Nav() {
   const [user, setUser] = useState(null)
@@ -25,24 +26,20 @@ export default function Nav() {
     location.href = '/signin'
   }
 
+  const role = profile?.role || null
+
   return (
     <nav>
       <Link href="/" className="brand">🐾 云喵 club</Link>
 
-      {(profile?.role === 'PLAYMATE' || profile?.role === 'ADMIN') && (
-        <Link href="/playmate/new">陪玩录单</Link>
-      )}
-      {(profile?.role === 'DISPATCH' || profile?.role === 'ADMIN') && (
-        <Link href="/dispatch">派单/客服</Link>
-      )}
-      {(profile?.role === 'FINANCE' || profile?.role === 'ADMIN') && (
-        <Link href="/finance">财务</Link>
-      )}
+      {canSee(role, 'playmateNew') && <Link href="/playmate/new">陪玩录单</Link>}
+      {canSee(role, 'dispatch')    && <Link href="/dispatch">派单/客服</Link>}
+      {canSee(role, 'finance')     && <Link href="/finance">财务</Link>}
 
       <div className="spacer" />
       {user ? (
         <>
-          <span className="badge">{profile?.role || 'NO-ROLE'}</span>
+          <span className="badge">{roleLabel(role)}</span>
           <small className="muted">{profile?.name || user.email}</small>
           <button className="ghost" onClick={signOut}>退出</button>
         </>
