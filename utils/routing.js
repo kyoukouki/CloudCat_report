@@ -1,20 +1,24 @@
 // utils/routing.js
-import { landingPath, normalizeRole } from '@/utils/roles';
+import { 默认入口, parseRoles } from './roles';
+
+export function routeAfterAuth(profile, router) {
+  const roles = parseRoles(profile || {});
+  const path = 默认入口(roles);
+  router.replace(path);
+}
 
 export function applyRoleTheme(role) {
-  const en = normalizeRole(role);
-  if (en) document.documentElement.setAttribute('data-role', en);
-  else document.documentElement.removeAttribute('data-role');
+  const root = typeof document !== 'undefined' ? document.documentElement : null;
+  if (!root) return;
+  const 色 = {
+    '陪玩': '#ff8fb3',     // 粉色
+    '客服': '#8fb3ff',     // 蓝色
+    '派单': '#8fb3ff',     // 蓝色
+    '财务': '#ffb14b',     // 橙色
+    '管理': '#7ac29a',     // 绿色
+  };
+  root.style.setProperty('--brand', 色[role] || '#ff8fb3');
 }
 
-export function routeAfterAuth(profile, router, fromPath) {
-  if (!profile) return;
-  if (profile.status === 'PENDING') {
-    if (fromPath !== '/pending') router.replace('/pending');
-    return;
-  }
-  const to = landingPath(profile.role);
-  if (['/','/signin','/pending','/auth/callback'].includes(fromPath)) {
-    router.replace(to);
-  }
-}
+// 兼容旧调用
+export const landingPath = 默认入口;
