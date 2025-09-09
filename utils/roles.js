@@ -27,6 +27,7 @@ export function displayRole(role) {
   return en ? EN2ZH[en] : '未设置';        // UI 显示中文徽章
 }
 
+// ===== 权限判断基础函数 =====
 export function isFinanceOrAdmin(role) {
   const en = normalizeRole(role);
   return en === 'FINANCE' || en === 'ADMIN';
@@ -38,6 +39,7 @@ export function isDispatch(role) {
   return normalizeRole(role) === 'DISPATCH';
 }
 
+// ===== 登录后落地页 =====
 export function landingPath(role) {
   const en = normalizeRole(role);
   const map = {
@@ -50,7 +52,7 @@ export function landingPath(role) {
 }
 
 /**
- * 向后兼容导出：
+ * 向后兼容方法（你的代码里已经在用）：
  * canSee(profileOrRole, ...allow)
  * - profileOrRole：可以是 profile 对象或字符串角色（中/英都可）
  * - allow：允许的角色（可变参数或数组，支持中/英）
@@ -69,3 +71,6 @@ export function canSee(profileOrRole, ...allow) {
   const allowed = allow.flat().map(normalizeRole).filter(Boolean);
   return r ? allowed.includes(r) : false;
 }
+
+// 兼容旧项目里导入的 roleLabel —— 等价于 displayRole
+export const roleLabel = displayRole;
