@@ -48,3 +48,24 @@ export function landingPath(role) {
   };
   return map[en] || '/';
 }
+
+/**
+ * 向后兼容导出：
+ * canSee(profileOrRole, ...allow)
+ * - profileOrRole：可以是 profile 对象或字符串角色（中/英都可）
+ * - allow：允许的角色（可变参数或数组，支持中/英）
+ * 用法示例：
+ *   canSee(profile, '财务', '管理')
+ *   canSee(profile, ['DISPATCH','FINANCE','ADMIN'])
+ *   canSee('陪玩', 'PLAYMATE')
+ */
+export function canSee(profileOrRole, ...allow) {
+  const role =
+    typeof profileOrRole === 'string'
+      ? profileOrRole
+      : (profileOrRole?.role ?? null);
+
+  const r = normalizeRole(role);
+  const allowed = allow.flat().map(normalizeRole).filter(Boolean);
+  return r ? allowed.includes(r) : false;
+}
