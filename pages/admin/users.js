@@ -1,90 +1,86 @@
+// pages/admin/users.js
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabaseClient'
+import { ROLE, 所有角色, parseRoles } from '@/utils/roles'
 import { useRoleGate } from '@/utils/guard'
+import Nav from '@/components/Nav'
 
-const ROLES = ['陪玩','客服','财务','管理']
+export default function AdminUsers() {
+  const r = useRouter()
+  const [meRoles, setMeRoles] = useState([])
+  const [list, setList] = useState([])
+  const [msg, setMsg] = useState('')
 
-export default function UsersAdmin(){
-  const ok = useRoleGate(['管理','财务'])
-  if (!ok) return null
+  useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser()
+      if (!u?.user) return r.replace('/signin')
+      const { data: me } = await supabase.from('profiles').select('*').eq('id', u.user.id).single()
+      setMeRoles(parseRoles(me))
+      await load()
+    })()
+  }, [])
+  useRoleGate(meRoles, [ROLE.ADMIN], r)
 
-  const [rows, setRows] = useState([])
-  const [q, setQ] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function load(){
-    setLoading(true)
-    // 查 PENDING + 搜索（按邮箱/昵称）
-    let query = supabase.from('profiles').select('id,email,name,role,status')
-      .order('created_at', { ascending:false })
-      .eq('status','PENDING')
-    if (q) query = query.or(`email.ilike.%${q}%,name.ilike.%${q}%`)
-    const { data } = await query
-    setRows(data || [])
-    setLoading(false)
+  async function load() {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id,email,name,role,roles,status')
+      .order('email', { ascending: true })
+      .limit(200)
+    if (error) setMsg(error.message)
+    else setList(data || [])
   }
-  useEffect(()=>{ load() }, [])
 
-  async function setRole(id, role){
-    await supabase.from('profiles').update({ role }).eq('id', id)
-    setRows(rs => rs.map(r => r.id===id? {...r, role} : r))
-  }
-  async function approve(id){
-    await supabase.from('profiles').update({ status:'APPROVED' }).eq('id', id)
-    setRows(rs => rs.filter(r => r.id!==id))
-  }
-  async function suspend(id){
-    await supabase.from('profiles').update({ status:'SUSPENDED' }).eq('id', id)
-    setRows(rs => rs.filter(r => r.id!==id))
+  async function saveRoles(id, roles) {
+    setMsg('')
+    const payload = { roles, role: roles[0] || null }
+    const { error } = await supabase.from('profiles').update(payload).eq('id', id)
+    if (error) setMsg('保存失败：' + error.message)
+    else { setMsg('已保存'); await load() }
   }
 
   return (
-    <div className="container">
-      <div className="card" style={{maxWidth:900, margin:'24px auto'}}>
-        <h2>用户审核台（待审核）</h2>
-        <div className="grid" style={{gridTemplateColumns:'1fr auto auto', alignItems:'center'}}>
-          <input className="input" placeholder="按邮箱/昵称搜索…" value={q}
-                 onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&load()}/>
-          <button onClick={load} disabled={loading}>{loading?'刷新中…':'刷新'}</button>
-          <a className="ghost button" href="/">返回首页</a>
-        </div>
-
-        <div className="table-wrap" style={{marginTop:12}}>
-          <table className="table">
-            <thead>
-              <tr><th>邮箱</th><th>昵称</th><th>角色</th><th>状态</th><th>操作</th></tr>
-            </thead>
-            <tbody>
-            {rows.map(r=>(
-              <tr key={r.id}>
-                <td>{r.email}</td>
-                <td>{r.name || '-'}</td>
-                <td>
-                  <select className="input" value={r.role || '陪玩'}
-                          onChange={e=>setRole(r.id, e.target.value)}>
-                    {ROLES.map(x => <option key={x}>{x}</option>)}
-                  </select>
-                </td>
-                <td>{r.status}</td>
-                <td className="row-btns">
-                  <button onClick={()=>approve(r.id)}>通过</button>
-                  <button className="ghost" onClick={()=>suspend(r.id)}>挂起</button>
-                </td>
-              </tr>
-            ))}
-            {!rows.length && <tr><td colSpan={5} style={{textAlign:'center',padding:'16px'}}>暂无待审核用户</td></tr>}
-            </tbody>
-          </table>
-        </div>
+    <div className="wrap">
+      <Nav/>
+      <div className="card">
+        <h2>用户 / 角色（管理）</h2>
+        {msg && <p className="tip">{msg}</p>}
+        <table className="t">
+          <thead>
+            <tr><th>邮箱</th><th>昵称</th><th>角色</th><th>操作</th></tr>
+          </thead>
+          <tbody>
+            {list.map(u => {
+              const current = parseRoles(u)
+              return (
+                <tr key={u.id}>
+                  <td>{u.email}</td>
+                  <td>{u.name || '-'}</td>
+                  <td>{current.join('、') || '未设置'}</td>
+                  <td>
+                    <select multiple value={current} onChange={(e)=>{
+                      const vals = Array.from(e.target.selectedOptions).map(o=>o.value)
+                      saveRoles(u.id, vals)
+                    }}>
+                      {所有角色.map(r=> <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+        <p style={{color:'#999'}}>（按住 Ctrl/⌘ 多选；保存后会自动刷新）</p>
       </div>
       <style jsx>{`
-        .table-wrap{ overflow-x:auto }
-        .table{ width:100%; border-collapse:collapse }
-        .table th,.table td{ padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap }
-        .row-btns{ display:flex; gap:8px }
-        @media (max-width:720px){
-          .table th:nth-child(2), .table td:nth-child(2){ display:none } /* 移动端隐藏昵称列 */
-        }
+        .wrap{ min-height:100vh; background:repeating-linear-gradient(0deg,#e9fff3,#e9fff3 24px,#f5fff9 24px,#f5fff9 48px); }
+        .card{ max-width:1000px; margin:16px auto; background:#fff; border:3px solid #bdf0cf; border-radius:16px; padding:16px; }
+        .tip{ color:#3a6; }
+        .t{ width:100%; border-collapse:collapse; }
+        .t th,.t td{ border:1px solid #eee; padding:8px; }
+        select{ min-width:140px; min-height:80px; }
       `}</style>
     </div>
   )
