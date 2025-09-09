@@ -4,6 +4,13 @@ import { useEffect, useMemo, useState } from 'react'
 
 function toISO(dtLocal) { const d = new Date(dtLocal); return d.toISOString() }
 function hoursBetween(a, b) { const s = new Date(a).getTime(); const e = new Date(b).getTime(); return Math.max(0, Math.round(((e - s)/3600000) * 100) / 100) }
+const user = (await supabase.auth.getUser()).data.user;
+
+await supabase.from('orders').insert({
+  created_by: user.id,      // 关键：让这单“归属我”
+  boss, playmate, project,  // 你的其它字段
+  date, hours, price, total, note
+});
 
 export default function Page() {
   const [user, setUser] = useState(null)
