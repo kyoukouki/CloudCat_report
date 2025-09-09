@@ -1,59 +1,39 @@
 // utils/roles.js
-
 export const ROLE = {
-  PLAYMATE: 'PLAYMATE',   // 陪玩
-  DISPATCH: 'DISPATCH',   // 客服/派单
-  FINANCE: 'FINANCE',     // 财务
-  ADMIN: 'ADMIN',         // 管理
+  PLAYMATE: '陪玩',
+  SERVICE: '客服',
+  DISPATCH: '派单',
+  FINANCE: '财务',
+  ADMIN: '管理',
+};
+
+export const 所有角色 = Object.values(ROLE);
+
+// 读取资料里的角色：优先数组 roles，其次单值 role
+export function parseRoles(profile) {
+  if (!profile) return [];
+  if (Array.isArray(profile.roles)) return profile.roles.filter(Boolean);
+  if (profile.role) return [profile.role];
+  return [];
 }
 
-const zh2en = {
-  '陪玩': ROLE.PLAYMATE,
-  '客服': ROLE.DISPATCH,
-  '派单': ROLE.DISPATCH,
-  '财务': ROLE.FINANCE,
-  '管理': ROLE.ADMIN,
+// 判断“用户角色 是否包含 任一需要角色”
+export function 可见(用户角色 = [], 需要 = []) {
+  const set = new Set(用户角色);
+  return 需要.some((r) => set.has(r));
 }
 
-const en2zh = {
-  [ROLE.PLAYMATE]: '陪玩',
-  [ROLE.DISPATCH]: '客服',
-  [ROLE.FINANCE]: '财务',
-  [ROLE.ADMIN]: '管理',
-}
+// 别名，兼容你项目里旧调用
+export const canSee = 可见;
+export const 角色名 = (r) => r;
+export const roleLabel = 角色名;
 
-/** 统一把中/英文角色转换成英文大写常量 */
-export function normalizeRole(input) {
-  if (!input) return ''
-  const s = String(input).trim().toUpperCase()
-  if (ROLE[s]) return s
-  const zh = String(input).trim()
-  return zh2en[zh] || ''
+// 登录后默认入口（从高权限到低权限）
+export function 默认入口(用户角色 = []) {
+  if (可见(用户角色, [ROLE.FINANCE])) return '/finance';
+  if (可见(用户角色, [ROLE.ADMIN])) return '/admin/users';
+  if (可见(用户角色, [ROLE.DISPATCH, ROLE.SERVICE])) return '/dispatch';
+  return '/playmate/new';
 }
-
-/** 将英文角色转中文展示 */
-export function roleLabel(role) {
-  const r = normalizeRole(role)
-  return en2zh[r] || '未设置'
-}
-
-/**
- * 导航/入口可见性（可按需扩展）
- * @param role 当前角色（中/英均可）
- * @param target 入口标识：'playmate' | 'dispatch' | 'finance' | 'admin'
- */
-export function canSee(role, target) {
-  const r = normalizeRole(role)
-  switch (target) {
-    case 'playmate':
-      return r === ROLE.PLAYMATE || r === ROLE.ADMIN || r === ROLE.DISPATCH
-    case 'dispatch':
-      return r === ROLE.DISPATCH || r === ROLE.ADMIN
-    case 'finance':
-      return r === ROLE.FINANCE || r === ROLE.ADMIN
-    case 'admin':
-      return r === ROLE.ADMIN
-    default:
-      return false
-  }
-}
+// 兼容旧调用
+export const landingPath = 默认入口;
