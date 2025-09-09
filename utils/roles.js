@@ -1,30 +1,41 @@
-// 统一的角色与中文名
-export const ROLES = {
+// utils/roles.js
+const ZH2EN = {
+  '陪玩': 'PLAYMATE',
+  '客服': 'DISPATCH',
+  '财务': 'FINANCE',
+  '管理': 'ADMIN',
+  // 允许直接是英文
+  PLAYMATE: 'PLAYMATE',
+  DISPATCH: 'DISPATCH',
+  FINANCE:  'FINANCE',
+  ADMIN:    'ADMIN',
+};
+
+const EN2ZH = {
   PLAYMATE: '陪玩',
   DISPATCH: '客服',
   FINANCE:  '财务',
   ADMIN:    '管理',
 };
 
-// 登录后跳去的页面
-export const landingPathByRole = {
-  PLAYMATE: '/playmate/new',
-  DISPATCH: '/dispatch',
-  FINANCE:  '/finance',
-  ADMIN:    '/finance', // 也可以改成 '/admin'
-};
-
-export const roleLabel = (role) => ROLES[role] || '未设置';
-export const getLandingPath = (role) => landingPathByRole[role] || '/signin';
-
-// 页面访问权限（按需改）
-export const canSee = (role, pageKey) => {
-  const perms = {
-    playmateNew: ['PLAYMATE','ADMIN'],
-    dispatch:    ['DISPATCH','ADMIN'],
-    finance:     ['FINANCE','ADMIN'],
-    admin:       ['ADMIN'],
+export function normalizeRole(role) {
+  return ZH2EN[role] || null;        // 统一成英文枚举
+}
+export function displayRole(role) {
+  const en = normalizeRole(role);
+  return en ? EN2ZH[en] : '未设置';  // 显示中文徽标
+}
+export function isFinanceOrAdmin(role) {
+  const en = normalizeRole(role);
+  return en === 'FINANCE' || en === 'ADMIN';
+}
+export function landingPath(role) {
+  const en = normalizeRole(role);
+  const map = {
+    PLAYMATE: '/playmate/new',
+    DISPATCH: '/dispatch',
+    FINANCE:  '/finance',
+    ADMIN:    '/finance',
   };
-  return (perms[pageKey] || []).includes(role);
-};
-
+  return map[en] || '/';
+}
