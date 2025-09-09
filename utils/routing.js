@@ -2,7 +2,6 @@
 import { landingPath, normalizeRole } from '@/utils/roles';
 
 export function applyRoleTheme(role) {
-  // 根据统一后的英文枚举，给 <html> 打 data-role，CSS 按它换主题
   const en = normalizeRole(role);
   if (en) document.documentElement.setAttribute('data-role', en);
   else document.documentElement.removeAttribute('data-role');
