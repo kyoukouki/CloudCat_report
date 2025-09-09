@@ -4,7 +4,7 @@ const ZH2EN = {
   '客服': 'DISPATCH',
   '财务': 'FINANCE',
   '管理': 'ADMIN',
-  // 兼容传进来就是英文的
+  // 兼容本来就是英文的
   PLAYMATE: 'PLAYMATE',
   DISPATCH: 'DISPATCH',
   FINANCE:  'FINANCE',
@@ -19,15 +19,14 @@ const EN2ZH = {
 };
 
 export function normalizeRole(role) {
-  return ZH2EN[role] || null;              // 统一成英文枚举
+  return ZH2EN[role] || null;              // 统一为英文
 }
 
 export function displayRole(role) {
   const en = normalizeRole(role);
-  return en ? EN2ZH[en] : '未设置';        // UI 显示中文徽标
+  return en ? EN2ZH[en] : '未设置';        // UI 显示中文徽章
 }
 
-// 常用权限判断
 export function isFinanceOrAdmin(role) {
   const en = normalizeRole(role);
   return en === 'FINANCE' || en === 'ADMIN';
@@ -39,7 +38,6 @@ export function isDispatch(role) {
   return normalizeRole(role) === 'DISPATCH';
 }
 
-// 登录后默认落地页
 export function landingPath(role) {
   const en = normalizeRole(role);
   const map = {
