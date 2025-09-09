@@ -1,75 +1,59 @@
 // utils/roles.js
-const ZH2EN = {
-  '陪玩': 'PLAYMATE',
-  '客服': 'DISPATCH',
-  '财务': 'FINANCE',
-  '管理': 'ADMIN',
-  PLAYMATE: 'PLAYMATE',
-  DISPATCH: 'DISPATCH',
-  FINANCE:  'FINANCE',
-  ADMIN:    'ADMIN',
-};
 
-const EN2ZH = {
-  PLAYMATE: '陪玩',
-  DISPATCH: '客服',
-  FINANCE:  '财务',
-  ADMIN:    '管理',
-};
-
-export function normalizeRole(role) {
-  return ZH2EN[role] || null;
+export const ROLE = {
+  PLAYMATE: 'PLAYMATE',   // 陪玩
+  DISPATCH: 'DISPATCH',   // 客服/派单
+  FINANCE: 'FINANCE',     // 财务
+  ADMIN: 'ADMIN',         // 管理
 }
 
-export function displayRole(role) {
-  const en = normalizeRole(role);
-  return en ? EN2ZH[en] : '未设置';
+const zh2en = {
+  '陪玩': ROLE.PLAYMATE,
+  '客服': ROLE.DISPATCH,
+  '派单': ROLE.DISPATCH,
+  '财务': ROLE.FINANCE,
+  '管理': ROLE.ADMIN,
 }
 
-// 常用判断（可选）
-export function isFinanceOrAdmin(role) {
-  const en = normalizeRole(role);
-  return en === 'FINANCE' || en === 'ADMIN';
-}
-export function isPlaymate(role) {
-  return normalizeRole(role) === 'PLAYMATE';
-}
-export function isDispatch(role) {
-  return normalizeRole(role) === 'DISPATCH';
+const en2zh = {
+  [ROLE.PLAYMATE]: '陪玩',
+  [ROLE.DISPATCH]: '客服',
+  [ROLE.FINANCE]: '财务',
+  [ROLE.ADMIN]: '管理',
 }
 
-// 登录后落地页（可选）
-export function landingPath(role) {
-  const en = normalizeRole(role);
-  const map = {
-    PLAYMATE: '/playmate/new',
-    DISPATCH: '/dispatch',
-    FINANCE:  '/finance',
-    ADMIN:    '/finance',
-  };
-  return map[en] || '/';
+/** 统一把中/英文角色转换成英文大写常量 */
+export function normalizeRole(input) {
+  if (!input) return ''
+  const s = String(input).trim().toUpperCase()
+  if (ROLE[s]) return s
+  const zh = String(input).trim()
+  return zh2en[zh] || ''
+}
+
+/** 将英文角色转中文展示 */
+export function roleLabel(role) {
+  const r = normalizeRole(role)
+  return en2zh[r] || '未设置'
 }
 
 /**
- * 兼容你现有写法：
- * canSee(profileOrRole, ...allow)
- * - profileOrRole：profile 对象或字符串角色（中/英都可）
- * - allow：允许的角色（可变参数或数组，支持中/英）
- * 例：
- *   canSee(profile, '财务','管理')
- *   canSee(profile, ['DISPATCH','FINANCE','ADMIN'])
- *   canSee('陪玩', 'PLAYMATE')
+ * 导航/入口可见性（可按需扩展）
+ * @param role 当前角色（中/英均可）
+ * @param target 入口标识：'playmate' | 'dispatch' | 'finance' | 'admin'
  */
-export function canSee(profileOrRole, ...allow) {
-  const role =
-    typeof profileOrRole === 'string'
-      ? profileOrRole
-      : (profileOrRole?.role ?? null);
-
-  const r = normalizeRole(role);
-  const allowed = allow.flat().map(normalizeRole).filter(Boolean);
-  return r ? allowed.includes(r) : false;
+export function canSee(role, target) {
+  const r = normalizeRole(role)
+  switch (target) {
+    case 'playmate':
+      return r === ROLE.PLAYMATE || r === ROLE.ADMIN || r === ROLE.DISPATCH
+    case 'dispatch':
+      return r === ROLE.DISPATCH || r === ROLE.ADMIN
+    case 'finance':
+      return r === ROLE.FINANCE || r === ROLE.ADMIN
+    case 'admin':
+      return r === ROLE.ADMIN
+    default:
+      return false
+  }
 }
-
-// 兼容旧用法：roleLabel == displayRole
-export const roleLabel = displayRole;
