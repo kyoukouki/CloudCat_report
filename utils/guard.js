@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+// utils/guard.js
+import { normalizeRole, isFinanceOrAdmin, isPlaymate, isDispatch } from '@/utils/roles';
 
-// 角色守卫 + 审批状态
-export function useRoleGate(roles) {
-  const [ok, setOk] = useState(false)
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return (location.href = '/signin')
-      const { data: p } = await supabase
-        .from('profiles').select('role,status').eq('id', data.user.id).single()
-      if (p?.status === 'PENDING') return (location.href = '/pending')
-      if (p?.status === 'SUSPENDED') return (location.href = '/suspended')
-      if (roles.includes(p?.role)) setOk(true); else location.href = '/'
-    })
-  }, [roles])
-  return ok
+// 判断用户是否具有指定角色（支持中文或英文）
+export function hasRole(profile, ...roles) {
+  const r = normalizeRole(profile?.role);
+  const wanted = roles.map(normalizeRole);
+  return r ? wanted.includes(r) : false;
+}
+
+// 常用封装
+export function canSeeFinance(profile) {
+  return isFinanceOrAdmin(profile?.role);
+}
+export function canSeeDispatch(profile) {
+  return isDispatch(profile?.role) || isFinanceOrAdmin(profile?.role);
+}
+export function canSeePlaymate(profile) {
+  return isPlaymate(profile?.role) || isFinanceOrAdmin(profile?.role);
 }
